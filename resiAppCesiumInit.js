@@ -113,8 +113,10 @@ async function LoadTilesetNewVersion()
 	);
 
 	tile2.maximumScreenSpaceError = 1;
-	tile2.skipLevelOfDetail = true;
+	tile2.skipLevelOfDetail = false;
+	//Older Cesium version
 	//tile2.maximumMemoryUsage = 4096;     // MB - increase for high-res
+	
 	// Newer CesiumJS (replaces maximumMemoryUsage)
 	tile2.cacheBytes = 1024 * 1024 * 1024;           // e.g. 1GB base cache
 	tile2.maximumCacheOverflowBytes = 1024 * 1024 * 1024 * 4; // allow overflow up to 4GB more
@@ -122,6 +124,11 @@ async function LoadTilesetNewVersion()
 	tile2.skipLevelOfDetailFrames = 5;
 	tile2.dynamicScreenSpaceError = true;
 	tile2.dynamicScreenSpaceErrorFactor = 4.0;
+	
+	tile2.preloadWhenHidden = true;        // keep loading/caching tiles even if tile2.show = false
+	tile2.preloadFlightDestinations = true; // preload tiles at the camera's flight destination
+	tile2.cullRequestsWhileMoving = false;  // don't cancel in-flight requests while camera moves (helps during fast zoom)
+	tile2.foveatedTiles = false;           // disable foveated culling if you don't want peripheral tiles deprioritized
 	
 	viewer.scene.globe.tileCacheSize = 1000;
 	
@@ -393,11 +400,11 @@ handler.setInputAction(function(click) {
 						if (!viewerDemoResiApp.scene.invertClassification) {
 							if(window.visualizationType != null)
 							{
-								attributes.color = [currentColor[0], currentColor[1], currentColor[2], 255];
+								attributes.color = [currentColor[0], currentColor[1], currentColor[2], 127];
 							}
 							else
 							{
-								attributes.color = [255, 0, 0, 255];
+								attributes.color = [255, 0, 0, 127];
 							}
 						}
 						attributes.show = [1];

@@ -25,9 +25,9 @@ var currentBuilding = "";
 var currentCondo = "";
 var defaultEntityHighlightColor = Cesium.Color.RED.withAlpha(1);
 var defaultEntityHighlightColorSelected = Cesium.Color.GREEN.withAlpha(1);
-var defaultPrimitiveHighlightColor = Cesium.ColorGeometryInstanceAttribute.fromColor(Cesium.Color.RED.withAlpha(0.5));
-var defaultPrimitiveRingColor = Cesium.ColorGeometryInstanceAttribute.fromColor(Cesium.Color.YELLOW.withAlpha(1));
-var defaultPrimitiveHighlightColorSelected = Cesium.ColorGeometryInstanceAttribute.fromColor(Cesium.Color.GREEN.withAlpha(1));
+var defaultPrimitiveHighlightColor = Cesium.ColorGeometryInstanceAttribute.fromColor(Cesium.Color.RED.withAlpha(1));
+var defaultPrimitiveRingColor = Cesium.ColorGeometryInstanceAttribute.fromColor(Cesium.Color.YELLOW.withAlpha(0.5));
+var defaultPrimitiveHighlightColorSelected = Cesium.ColorGeometryInstanceAttribute.fromColor(Cesium.Color.GREEN.withAlpha(0.5));
 
 var resirentalData = [];
 
