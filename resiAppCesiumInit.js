@@ -113,6 +113,8 @@ async function LoadTilesetNewVersion()
 	);
 
 	tile2.maximumScreenSpaceError = 1;
+	
+	/*
 	tile2.skipLevelOfDetail = false;
 	//Older Cesium version
 	//tile2.maximumMemoryUsage = 4096;     // MB - increase for high-res
@@ -131,6 +133,7 @@ async function LoadTilesetNewVersion()
 	tile2.foveatedTiles = false;           // disable foveated culling if you don't want peripheral tiles deprioritized
 	
 	viewer.scene.globe.tileCacheSize = 1000;
+	*/
 	
 	viewer.scene.globe.depthTestAgainstTerrain = true;
 	height = 30;
@@ -396,6 +399,7 @@ handler.setInputAction(function(click) {
 					
 						attributes = selectedPrimitive.getGeometryInstanceAttributes(selectedPrimitiveId);
 						currentColor = attributes.color;
+						window.lastColor = attributes.color;
 						currentShow = attributes.show;
 						if (!viewerDemoResiApp.scene.invertClassification) {
 							if(window.visualizationType != null)
@@ -458,6 +462,42 @@ handler.setInputAction(function(click) {
 	
 }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
+//Double Click
+handler.setInputAction(function(click) {
+	console.log("Dobule Click!!!");
+	pickedObject = viewerDemoResiApp.scene.pick(click.position);
+	
+	if(typeof pickedObject != "undefined")
+	{
+		var tempId = null;
+		console.log(window.pickedObject);
+		var temp = null;
+		if(typeof window.pickedObject!= "undefined" && typeof window.pickedObject.id != "undefined" && typeof window.pickedObject.id.id  == "undefined")
+		{
+			temp= window.pickedObject.id.split("-");
+			tempId = window.pickedObject.id;
+		}
+		else if(typeof window.pickedObject.id != "undefined" && typeof window.pickedObject.id.id != "undefined")
+		{
+			temp = window.pickedObject.id.id.split("-");
+			tempId = window.pickedObject.id.id;
+			//alert("id "+window.pickedObject.id.id);
+		}
+		
+		selectedPrimitiveId = pickedObject.id;
+		selectedPrimitive = pickedObject.primitive;
+		window.lastSelectedUnitPrimitive = pickedObject;
+		if(typeof selectedPrimitiveId != 'object')
+		{
+			if(selectedPrimitiveId.split("-")[0] == "resirental")
+			{
+				flyToIdtcamera(selectedRetalG.idtcamera);
+			}
+		}
+	}
+	
+}, Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
+
 viewerDemoResiApp.cesiumWidget.screenSpaceEventHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
 
 var handler2 = new Cesium.ScreenSpaceEventHandler(viewerDemoResiApp.scene.canvas);
@@ -492,7 +532,7 @@ function resetPartialColor()
 			if(typeof currentColor != "undefined" && typeof currentColor[0] != "undefined")
 			{
 				if (!viewerDemoResiApp.scene.invertClassification) {
-					attributes.color = [currentColor[0], currentColor[1], currentColor[2], 128];
+					attributes.color = [currentColor[0], currentColor[1], currentColor[2], 255];
 				}
 			}
 			attributes.show = [1];
@@ -517,6 +557,7 @@ function resetLastSelectedPrimitive()
 		{
 			var t = window.selectedPrimitiveId.split("-");
 			console.log(t);
+			console.log(window.lastColor);
 			console.log("window.lastColor");
 			
 			if(typeof viewerDemoResiApp.entities.getById(window.lastBuildingId) != "undefined"){

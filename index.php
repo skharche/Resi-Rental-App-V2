@@ -420,17 +420,23 @@ if(isset($userProfile[0]))
 <div class="rightContentWindow box-body" style="display:none;width:595px;" id="residetails">
 	<span class="resiCollapseTab" onclick="toggleResiDetailsCollapse();"><i id="resiCollapseIcon" class="fa fa-chevron-right"></i></span>
   <b>
-  <span class="buildingname"></span>&nbsp;&nbsp;&nbsp;<span class="viewFromBuilding"></span></b>&nbsp;<span class="gobackshowStats" style="/*margin-left:200px;*/"><button class="btn btn-primary btn-xs backButtonCSS" onClick="gobackshowStats();resetPartialColor();">Back to Summary</button></span>
+  <span class="buildingname bigFontSize"></span>&nbsp;&nbsp;&nbsp;<span class="viewFromBuilding"></span></b>&nbsp;<span class="gobackshowStats" style="/*margin-left:200px;*/"><button class="btn btn-primary btn-xs backButtonCSS" onClick="gobackshowStats();resetPartialColor();">Back to Summary</button></span>
   <span class="pull-right"><span class="material-icons" onClick="resetCondoInformation();" style="cursor: pointer;">cancel_presentation</span></span>
   </b>
   <ul class="nav nav-pills customnavpills">
   <li class="active">
-    <a data-toggle="tab" class="active" href="#infotab" >Info</a>
+    <a data-toggle="tab" class="active" href="#infotab" >Details</a>
+  </li>
+  <li>
+    <a data-toggle="tab" href="#picturestab">Pictures</a>
   </li>
   <li>
     <a data-toggle="tab" href="#floorplantab">Floor Plan</a>
   </li>
   <li>
+    <a data-toggle="tab" href="#views" >Views</a>
+  </li>
+  <!--li>
     <a data-toggle="tab" href="#unittab" >Unit</a>
   </li>
   <li>
@@ -438,12 +444,9 @@ if(isset($userProfile[0]))
   </li>
   <li>
     <a data-toggle="tab" href="#commonareastab">Common Areas</a>
-  </li>
+  </li-->
   <li>
-    <a data-toggle="tab" href="#views" >Views</a>
-  </li>
-  <li>
-    <a data-toggle="tab" href="#propsee" >PropSee</a>
+    <a data-toggle="tab" href="#propsee" >PropSee Data</a>
   </li>
 </ul>
 <div class="tab-content">
@@ -457,8 +460,22 @@ if(isset($userProfile[0]))
       <tr><th>Date Added</th><td><span id="tresidateadded"></span></td><th>Days on Market</th><td><span id="tdays"></span></td></tr>
     </table>
   </div>
+  
   <div align="center" id="floorplantab" style="height:100%" class="tab-pane fade verticalScroll"><span class="imagesDisplayContainerFloorPlan"></span><span class="viewFloatingRings"></span><span class="otherUnitButtonContainer"></span></div>
-  <div align="center" id="unittab" class="tab-pane fade verticalScroll"><span class="imagesDisplayContainerUnitPictures"></span></div>
+  
+  <div align="center" id="picturestab" class="tab-pane fade verticalScroll">
+	<ul class="nav nav-pills customnavpills">
+		<li class="active"><a data-toggle="tab" href="#unittab" class="unittab">Unit</a></li>
+		<li><a data-toggle="tab" href="#exteriortab" class="exteriortab">Exterior</a></li>
+		<li><a data-toggle="tab" href="#commonareastab" class="commonareastab">Common Areas</a></li>
+	</ul>
+	<div class="tab-content">
+		<div align="center" id="unittab" class="tab-pane fade verticalScroll in active"><span class="imagesDisplayContainerUnitPictures"></span></div>
+		<div align="center" id="exteriortab" class="tab-pane fade verticalScroll"><span class="imagesDisplayContainerExteriorView"></span></div>
+		<div align="center" id="commonareastab" class="tab-pane fade verticalScroll"><span class="imagesDisplayContainerBuildingAreas"></span></div>
+	</div>
+  </div>
+  
   <div align="center" id="propsee" class="tab-pane fade verticalScroll">
 	<ul class="nav nav-pills customnavpills">
 		<li class="active"><a data-toggle="tab" href="#PROPSEE_PHYSICAL" class="PROPSEE_PHYSICAL">Physical</a></li>
@@ -502,8 +519,7 @@ if(isset($userProfile[0]))
 		</div>
 	</div>
   </div>
-  <div align="center" id="exteriortab" class="tab-pane fade verticalScroll"><span class="imagesDisplayContainerExteriorView"></span></div>
-  <div align="center" id="commonareastab" class="tab-pane fade verticalScroll"><span class="imagesDisplayContainerBuildingAreas"></span></div>
+  
   <div align="left" id="views" class="tab-pane fade verticalScroll"><span class="viewsContainer" style="float:left;"></span></div>
 </div>
 </div>

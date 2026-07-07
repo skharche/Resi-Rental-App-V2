@@ -492,3 +492,147 @@
 	#submarketStats .table > thead > tr > th {
 		padding: 4px !important;
 	}
+	
+	.bigFontSize{
+		font-size: 18px !important;
+	}
+	/*
+	#imageContainerBig {
+		width: 100vw;
+		height: 100vh;
+		overflow: hidden;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+
+	.bigImage {	
+		max-width: 100%;
+		max-height: 100%;
+		width: auto;
+		height: auto;
+		object-fit: contain;
+		cursor: pointer;
+	}
+	*/
+	
+	/* Full screen modal dialog */
+#imageModal .modal-dialog.modal-lg {
+  width: 100vw;
+  max-width: 100vw;
+  height: 100vh;
+  margin: 0;
+}
+
+/* Modal content fills entire screen */
+#imageModal .modal-content {
+  width: 100vw;
+  height: 100vh;
+  border: none;
+  border-radius: 0;
+  background: rgba(0, 0, 0, 0.9);
+  box-shadow: none;
+}
+
+/* Header - just holds the close button */
+#imageModal .modal-header {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: auto;
+  border: none;
+  background: transparent;
+  padding: 0;
+  z-index: 100002;
+}
+
+#imageModal .modal-header .close {
+  position: fixed;
+  top: 15px;
+  right: 20px;
+  font-size: 36px;
+  color: #fff;
+  opacity: 0.9;
+  text-shadow: 0 0 4px rgba(0,0,0,0.8);
+  z-index: 100002;
+}
+
+/* Body fills full screen, image centers inside it */
+#imageModal .modal-body.imageModalContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Image container centers the image inside full-screen body */
+#imageModal #imageContainerBig {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Image scales to fit screen without distortion */
+#imageModal .bigImage {
+  max-width: 96vw;
+  max-height: 96vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+/* LEFT ARROW - fixed position, always same place regardless of image size */
+#imageModal .row:has(.fa-chevron-left) {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 80px;
+  height: 100vh !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 !important;
+  z-index: 100001;
+}
+
+/* RIGHT ARROW - fixed position, always same place regardless of image size */
+#imageModal .row:has(.fa-chevron-right) {
+  position: fixed !important;
+  top: 0 !important;
+  right: 0 !important;
+  left: auto !important;
+  width: 80px;
+  height: 100vh !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 !important;
+  z-index: 100001;
+}
+
+#imageModal .fa-chevron-left,
+#imageModal .fa-chevron-right {
+  cursor: pointer;
+  color: #fff !important;
+  opacity: 0.6;
+  text-shadow: 0 0 6px rgba(0,0,0,0.8);
+  transition: opacity 0.2s ease;
+}
+
+#imageModal .fa-chevron-left:hover,
+#imageModal .fa-chevron-right:hover {
+  opacity: 1;
+}
+
+/* Remove any body scroll while modal open (optional, if not already handled) */
+body.modal-open {
+  overflow: hidden;
+}

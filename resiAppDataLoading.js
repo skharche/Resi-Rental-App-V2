@@ -106,6 +106,55 @@ function flyToIdtcamera(idtcamera, duration = "")
 	});
 }
 
+function flyToIdtcameraV3(idtcamera, idtbuilding, startSpin = false, lon = null, lat = null, duration = 0)
+{
+	if(typeof buildingCameraDataLogged[idtbuilding] == "undefined")
+	{
+		buildingCameraDataLogged[idtbuilding] = [];
+		$.ajax({
+		  method: "POST",
+		  url: apiBaseUrl+"controllers/cameraController.php",
+		  data: { param : "getCamera" , idtcamera : idtcamera}
+		})
+		.done(function( data ) {
+			data = $.parseJSON( data );
+			//console.log(data);
+			if(data.status == "success")
+			{
+				console.log(data.data[0]);
+				if(typeof data.data[0] != "undefined")
+				{
+					buildingCameraDataLogged[idtbuilding] = data.data[0];
+					flyToCamera(data.data[0].latitude, data.data[0].longitude, data.data[0].altitude, data.data[0].heading, data.data[0].tilt, data.data[0].pitch, data.data[0].roll, duration, viewerDemoResiApp.camera);
+					
+					if(startSpin)
+					{
+						setTimeout(function (){
+							//chapter13BuildingCameraSpin(idtbuilding, selectedRetalG.longitude, selectedRetalG.latitude, selectedRetalG.altitude, isNewBuilding = true);
+							chapter13BuildingCameraSpin(idtbuilding, buildingCameraDataLogged[idtbuilding].longitude, buildingCameraDataLogged[idtbuilding].latitude, buildingCameraDataLogged[idtbuilding].altitude, isNewBuilding = true);
+						}, duration * 1000);
+					}
+				}
+			}
+			else
+			{
+				alert("Something went wrong");
+			}
+		});
+	}
+	else
+	{
+		flyToCamera(buildingCameraDataLogged[idtbuilding].latitude, buildingCameraDataLogged[idtbuilding].longitude, buildingCameraDataLogged[idtbuilding].altitude, buildingCameraDataLogged[idtbuilding].heading, buildingCameraDataLogged[idtbuilding].tilt, buildingCameraDataLogged[idtbuilding].pitch, buildingCameraDataLogged[idtbuilding].roll, duration, viewerDemoResiApp.camera);
+		
+		if(startSpin)
+		{
+			setTimeout(function (){
+				chapter13BuildingCameraSpin(idtbuilding, buildingCameraDataLogged[idtbuilding].longitude, buildingCameraDataLogged[idtbuilding].latitude, buildingCameraDataLogged[idtbuilding].altitude, isNewBuilding = true);
+			}, duration * 1000);
+		}
+	}
+}
+
 //Load all Market Details
 function loadMarketDetails()
 {
@@ -255,7 +304,7 @@ window.resiRentalAllDataMap = [];
 window.firstClipDone = false;
 window.firstFiltered = false;
 window.bedsSelected = [];
-function filterPresentationData()
+function filterPresentationData(isSlider = false)
 {
 	$("#BackToUnitButton").addClass("hide");
 	if(typeof Slider != "undefined" && window.ResiRentalDataLoaded == true)
@@ -264,7 +313,7 @@ function filterPresentationData()
 		$('#submarketStatistics').fadeOut();
 		updatePriceRange();
 		window.firstFiltered = true;
-		filterResiRentalLoadedData();
+		filterResiRentalLoadedData(isSlider);
 		//createFogEffectForSubmarketWithBuildingHoles();
 	}
 	else
@@ -353,8 +402,9 @@ function getResiRentalDataFromJSON(jsonData)
 }
 
 window.buildingPartialsMap = [];
-function filterResiRentalLoadedData()
+function filterResiRentalLoadedData(isSlider = false)
 {
+	window.floorNumberLabelsCustom.destroy();
 	resetResiStat();
 	clearLegendElement();
 	if(window.firstClipDone)
@@ -466,7 +516,7 @@ function filterResiRentalLoadedData()
 							//ent = highlightBuildingCondo("", "bottom-border-"+index, parseFloat(row.bottomfloorheight), (parseFloat(row.bottomfloorheight)+0.25), "resirental-"+index, row.coords, cesColor);
 							//resiRentalEntities.push({"entity": ent, "id": "bottom-border-"+index, "beds": row.beds, "monthlyRent": row.monthly_rent});
 							
-							ent = highlightBuildingCondo(row.idtbuilding, "resirental-"+index, ht, parseFloat(row.bottomfloorheight), "resirental-"+index, row.coords, cesColor);
+							ent = highlightBuildingCondo(row.idtbuilding, "resirental-"+index, ht, parseFloat(row.bottomfloorheight), "resirental-"+index, row.coords, cesColor, parseInt(row.monthly_rent));
 							resiRentalEntities.push({"entity": ent, "id": "resirental-"+index, "beds": row.beds, "monthlyRent": row.monthly_rent, "idtsub": row.idtsubmarket, "idtbldg": row.idtbuilding});
 							createResiRentalBorderBottomAndUpForAll(index);
 						}
@@ -630,6 +680,7 @@ function filterResiRentalLoadedData()
 	if(!window.fogChecked)
 	{
 		window.fogChecked = true;
+		$(".toggleContainer2").removeClass("fa-toggle-off");
 		$(".toggleContainer2").addClass("fa-toggle-on text-grey-color");
 	}
 	if(window.fogChecked)
@@ -686,7 +737,7 @@ function filterWithPrice(price)
 		return false;
 }
 
-function filterLoadedData()
+function filterLoadedData(isSlider = false)
 {
 	console.log("IN filterLoadedData()");
 	resetResiStat();
@@ -707,27 +758,34 @@ function filterLoadedData()
 	});
 	if(!isNaN(window.count))
 	{
-		$('.filterMessage').each(function() {
-			var $this = $(this),
-			countTo = window.count;
-			
-			$({ countNum: $this.text()}).animate({
-			  countNum: countTo
-			},
-			{
-			  duration: 1500,
-			  easing:'linear',
-			  step: function() {
-				  if(!isNaN(Math.floor(this.countNum)))
-					$this.text(Math.floor(this.countNum) + " results");
-			  },
-			  complete: function() {
-				  if(!isNaN(this.countNum))
-					$this.text(this.countNum + " results");
-			  }
+		if(isSlider)
+		{
+			$(".filterMessage").html(window.count + " results");
+		}
+		else
+		{
+			$('.filterMessage').each(function() {
+				var $this = $(this),
+				countTo = window.count;
+				
+				$({ countNum: $this.text()}).animate({
+				  countNum: countTo
+				},
+				{
+				  duration: 1500,
+				  easing:'linear',
+				  step: function() {
+					  if(!isNaN(Math.floor(this.countNum)))
+						$this.text(Math.floor(this.countNum) + " results");
+				  },
+				  complete: function() {
+					  if(!isNaN(this.countNum))
+						$this.text(this.countNum + " results");
+				  }
+				});
+				
 			});
-			
-		});
+		}
 	}
 	//createFogEffectForSubmarketWithBuildingHoles();
 }
@@ -1237,7 +1295,7 @@ function clearFloatingRings(idtbldg = "")
 }
 
 //Condo Management
-function highlightBuildingCondo(idtbldg, id, height, extrudedHeight, description, coords, cesiumColor)
+function highlightBuildingCondo(idtbldg, id, height, extrudedHeight, description, coords, cesiumColor, monthly_rent = null)
 {
 	addToSubmarketBag(idtbldg);
 	//console.log(id+"\n"+height+"\n"+extrudedHeight+"\n"+description+"\n"+coords);
@@ -1260,6 +1318,14 @@ function highlightBuildingCondo(idtbldg, id, height, extrudedHeight, description
 		classificationType : Cesium.ClassificationType.BOTH
 	}));
 	primitiveCollection.push(ent);
+	if(monthly_rent != null)
+	{
+		var temp = coords.split(",");
+		console.log("Height: "+(parseInt(extrudedHeight) + parseInt(height)));
+		showFloorNumberLabelV4("flrLabel-"+idtbldg+"-"+floorNumberLabelsCustom.length,  temp[0], temp[1], 110, monthly_rent, '13px helvetica neue', Number.POSITIVE_INFINITY, false, false, true, Cesium.Color.RED, Cesium.Color.WHITE);
+		//showFloorNumberLabelV4("flrLabel-"+idtbldg+"-"+floorNumberLabelsCustom.length,  temp[0], temp[1], height, monthly_rent, '13px helvetica neue', Number.POSITIVE_INFINITY, false, false, true, Cesium.Color.RED, Cesium.Color.WHITE);
+	}
+	
 	return ent;
 }
 
@@ -1691,7 +1757,7 @@ function prepareCondoInformation(idtresirentals)
     //console.log(data);
     if(data.status == "success")
     {
-      $('.buildingname').html("<a href='javascript:flyToIdtcamera("+selectedRetal.idtcamera+");'>"+selectedRetal.name+"</a>");//, "+selectedRetal.unit
+      $('.buildingname').html("<a href='javascript:flyToIdtcameraV3("+selectedRetal.idtcamera+", "+window.selectedRetalG.idtbuilding+");'>"+selectedRetal.name+"</a>");//, "+selectedRetal.unit
       //infotab
       $('#unitresirental').html(selectedRetal.unit);
 	  var floorNumberFormat = selectedRetal.number;
@@ -1796,6 +1862,7 @@ function prepareCondoInformation(idtresirentals)
       //temp += "<a class='btn btn-xs btn-primary' style='font-size: 13.5px;' onclick='javascript:unitViewForPartial();'>View</a>&nbsp;";
 	  if(window.clippingPlaneBuildings.includes(parseInt(selectedRetal.idtbuilding)))
 	  {
+		  /*
 		  lbl = "Show Floor";
 		  cls = " btn-primary ";
 		  if(window.clippingFeatureActive)
@@ -1804,7 +1871,8 @@ function prepareCondoInformation(idtresirentals)
 			  cls = " btn-default ";
 		  }
 		  temp += "<a class='btn btn-xs "+cls+" showButtonText' style='font-size: 13.5px;' onclick='javascript:showClippingPlane("+selectedRetal.idtbuilding+");'>"+lbl+"</a>&nbsp;";
-		  
+		  */
+		  /*
 		  lbl2 = "Show Other Units";
 		  cls2 = " btn-primary ";
 		  if(window.floatingRingDisplayFlag)
@@ -1813,6 +1881,15 @@ function prepareCondoInformation(idtresirentals)
 			cls2 = " btn-default ";
 		  }
 		  $(".otherUnitButtonContainer").html("<a class='btn btn-xs "+cls2+" showOtherUnitButtonText' style='font-size: 13.5px;' onclick='javascript:toggleFloatingRingDisplay("+selectedRetal.idtbuilding+");'>"+lbl2+"</a>&nbsp;");
+		  */
+		  lbl2 = "Show Floor";
+		  cls2 = " btn-primary ";
+		  if(window.clippingFeatureActive)
+		  {
+			lbl2 = "Hide Floor";
+			cls2 = " btn-default ";
+		  }
+		  $(".otherUnitButtonContainer").html("<a class='btn btn-xs "+cls2+" showButtonText' style='font-size: 13.5px;' onclick='javascript:showClippingPlane("+selectedRetal.idtbuilding+");'>"+lbl2+"</a>&nbsp;");
 	  }
 	  spinCls = "btn-primary";
 	  spinTxt = "Spin";
@@ -1822,7 +1899,7 @@ function prepareCondoInformation(idtresirentals)
 		  spinTxt = "Stop";
 	  }
 	  
-	  temp += "<a class='btn btn-xs "+spinCls+" spinButtonText' style='font-size: 13.5px;' onclick='chapter13BuildingCameraSpin("+selectedRetalG.idtbuilding+", "+selectedRetalG.longitude+", "+selectedRetalG.latitude+", "+ht+");'>"+spinTxt+"</a>";
+	  temp += "<a class='btn btn-xs "+spinCls+" spinButtonText' style='font-size: 13.5px;' onclick='flyToBuildingAndSpin("+selectedRetalG.idtbuilding+", "+selectedRetalG.longitude+", "+selectedRetalG.latitude+", "+ht+");'>"+spinTxt+"</a>";
 	  if(window.toggleFloorSpinEnabled)
 	  {
 		  //Change Spin to new partial
@@ -1929,7 +2006,7 @@ function prepareCondoInformation(idtresirentals)
 
 function onPriceSliderChange() {
 	if($("#idtsubmarket").val() != "")
-		filterPresentationData();
+		filterPresentationData(true);
 }
 
 function addViews()
@@ -2475,7 +2552,7 @@ function updatePriceRange() {
 	window.priceTo = parseInt(temp[1]);
 	if(!window.firstFiltered || true)
 	{
-		filterLoadedData();
+		filterLoadedData(true);
 		updateSummaryInfoboxes();
 	}
 }
@@ -2762,11 +2839,43 @@ loadMarketDetails();
 loadSubmarketDetails();
 loadMinMaxPriceForSubmarket('all');
 
+function flyToBuildingAndSpin(idtbuilding, centroidLon, centroidLat, height, isNewBuilding = true)
+{
+	if(window.toggleFloorSpinEnabled || $(".spinButtonText").text() == "Stop")
+	{
+		$(".spinButtonText").text("Spin");
+		$(".spinButtonText").toggleClass("btn-default");
+		$(".spinButtonText").toggleClass("btn-primary");
+		//enableSpinForBuilding(idtbuilding, centroidLon, centroidLat, height);
+		StopCameraRotation();
+		viewerDemoResiApp.scene.camera.lookAtTransform(Cesium.Matrix4.IDENTITY);
+	}
+	else
+	{
+		if(typeof buildingCameraDataLogged[idtbuilding] == "undefined")
+		{
+			flyToIdtcameraV3(selectedRetalG.idtcamera, idtbuilding, true, selectedRetalG.longitude, selectedRetalG.latitude, 4);
+		}
+		else
+		{
+			time = 4;
+			if(isCameraAtPosition(parseFloat(buildingCameraDataLogged[idtbuilding].latitude), parseFloat(buildingCameraDataLogged[idtbuilding].longitude), parseFloat(buildingCameraDataLogged[idtbuilding].altitude)))
+			{
+				console.log("Camera already at target position - starting rotation immediately");
+				time = 0;
+			}
+			
+			flyToIdtcameraV3(selectedRetalG.idtcamera, idtbuilding, true, selectedRetalG.longitude, selectedRetalG.latitude, time);
+		}
+	}
+}
 
 /*	New Spin functionality	*/
 window.toggleFloorSpinEnabled = false;
 function chapter13BuildingCameraSpin(idtbuilding, centroidLon, centroidLat, height, isNewBuilding = true)
 {
+	height = parseInt(height);
+	console.log(idtbuilding+", LON: "+centroidLon+", LAT: "+centroidLat+", HEIGHT: "+height);
 	if(isNewBuilding)
 		window.toggleFloorSpinEnabled = !window.toggleFloorSpinEnabled;
 	if(window.toggleFloorSpinEnabled)
@@ -5035,7 +5144,86 @@ getPlutoBuildingDetails();
 
 Cesium.Math.setRandomNumberSeed(315);
 setClockTime();
+/*
+showFloorNumberLabelV4("flrLabel-11",  -74.01146091372902, 40.7086312444966, 64.93113552053885, "$44,000", '13px helvetica neue', Number.POSITIVE_INFINITY, false, false, true, Cesium.Color.RED, Cesium.Color.WHITE);
+*/
+window.floorNumberLabelsCustom = viewer.scene.primitives.add(new Cesium.LabelCollection());
+function showFloorNumberLabelV4(id, lon, lat, height, label, font, disableDepthTestDistance, fadeByDistance = false, showBackground = true, clearOthers = true, backgroundColor = "", textColor = "")
+{
+	console.log(id+"\n"+lon+"\n"+lat+"\n"+height+"\n"+label);
+	/* if(clearOthers)
+	{
+		window.floorNumberLabelsCustom.destroy();
+		window.floorNumberLabelsCustom = viewer.scene.primitives.add(new Cesium.LabelCollection());
+	} */
+	var translucencyByDistance = undefined;
+	if(fadeByDistance)
+	{
+		var translucencyByDistance = new Cesium.NearFarScalar(300, 1.0, 500, 0.0);
+	}
+	var bgColor = new Cesium.Color(0.165, 0.165, 0.165, 0.8);
+	if(backgroundColor != "")
+		bgColor = backgroundColor;
+	
+	var fillColor = Cesium.Color.WHITE;
+	if(textColor != "")
+		fillColor = textColor;
+	var position = Cesium.Cartesian3.fromDegrees(lon, lat, parseFloat(height.toFixed(2)));
+	window.floorNumberLabelsCustom.add({
+		id: id,
+		position : position,
+		/*scaleByDistance : Cesium.NearFarScalar(50, 1, 200, 0.5),*/
+		text : label,
+		translucencyByDistance : translucencyByDistance,
+		showBackground : showBackground,
+		backgroundColor: bgColor,
+		fillColor: fillColor,
+		font : '13px helvetica neue',
+		/* horizontalOrigin : Cesium.HorizontalOrigin.LEFT,
+		verticalOrigin : Cesium.VerticalOrigin.BOTTOM, */
+		disableDepthTestDistance : disableDepthTestDistance
+	});
+}
 
+let buildingCameraDataLogged = [];
+
+// Tolerance thresholds for camera position comparison
+const CAMERA_TOLERANCE = {
+    latitude: 0.0001,      // ~11 meters
+    longitude: 0.0001,     // ~11 meters  
+    altitude: 10           // 10 meters
+};
+/**
+ * Compare two camera positions with tolerance
+ */
+function isCameraAtPosition(targetLat, targetLon, targetAlt, tolerance = CAMERA_TOLERANCE) {
+    const currentPos = getCurrentCameraPosition();
+    
+    const latDiff = Math.abs(currentPos.latitude - targetLat);
+    const lonDiff = Math.abs(currentPos.longitude - targetLon);
+    const altDiff = Math.abs(currentPos.altitude - targetAlt);
+    
+    const isAtPosition = 
+        latDiff <= tolerance.latitude &&
+        lonDiff <= tolerance.longitude &&
+        altDiff <= tolerance.altitude;
+    
+    console.log(`Camera comparison - Lat: ${latDiff.toFixed(6)} (${isAtPosition ? '✓' : '✗'}), Lon: ${lonDiff.toFixed(6)}, Alt: ${altDiff.toFixed(0)}m`);
+    
+    return isAtPosition;
+}
+
+/**
+ * Get current camera position in lat/lon/altitude
+ */
+function getCurrentCameraPosition() {
+    const cartographic = Cesium.Cartographic.fromCartesian(viewer.camera.position);
+    return {
+        latitude: Cesium.Math.toDegrees(cartographic.latitude),
+        longitude: Cesium.Math.toDegrees(cartographic.longitude),
+        altitude: cartographic.height
+    };
+}
 
 
 
